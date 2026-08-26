@@ -2,18 +2,19 @@ from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
 from database import get_db, init_db
 
-app = FastAPI(title="Task Management API")
+app = FastAPI()
 
-# Initialize DB on app launch
+# Initialize database on application load
 init_db()
 
 
+# Pydantic schema for creating a task
 class TaskCreate(BaseModel):
     title: str
     completed: bool = False
 
 
-# Helper: To map sql on a1 contact ditionary('done' -> 'completed')
+# Helper function to convert DB row to API response format
 def map_task(row):
     return {
         "id": row["id"],
@@ -32,7 +33,7 @@ def health_check():
     return {"status": "ok"}
 
 
-# STAGE 1: GET /tasks (Fetch all tasks from SQLite)
+# STAGE 1: Get all tasks
 @app.get("/tasks", status_code=status.HTTP_200_OK)
 def get_tasks():
     conn = get_db()
@@ -44,7 +45,7 @@ def get_tasks():
     return [map_task(row) for row in rows]
 
 
-# STAGE 1: GET /tasks/{task_id} (Fetch single task from SQLite)
+# STAGE 1: Get single task by ID
 @app.get("/tasks/{task_id}", status_code=status.HTTP_200_OK)
 def get_task(task_id: int):
     conn = get_db()
@@ -61,3 +62,29 @@ def get_task(task_id: int):
         )
 
     return map_task(row)
+
+
+# STAGE 2: Create a new task
+@app.post("/tasks", status_code=status.HTTP_201_CREATED)
+def create_task(task: TaskCreate):
+    # Return 400 error if title is empty or only whitespace
+    if not task.title or not task.title.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Title cannot be empty",
+        )
+
+    clean_title = task.title.strip()
+
+    # Insert new record into database
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO tasks (title, done) VALUES (?, ?)",
+        (clean_title, int(task.completed)),
+    )
+    conn.commit()
+    new_id = cursor.lastrowid
+    conn.close()
+
+    return {"id": new_id, "title": clean_title, "completed": task.completed}
