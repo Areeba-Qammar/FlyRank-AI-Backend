@@ -1,0 +1,6 @@
+[
+  {
+    "product_url": "https://books.toscrape.com/catalogue/broken-test-book-404_9999/index.html",
+    "reason": "Fetch failed: HTTP status 404"
+  }
+]
