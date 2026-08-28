@@ -14,7 +14,11 @@ if not SUPABASE_URL or not SUPABASE_KEY:
     raise RuntimeError("SUPABASE_URL or SUPABASE_KEY missing in .env")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-app = FastAPI(title="FlyRank Auth API - A4")
+
+app = FastAPI(
+    title="FlyRank Auth API — Week 4 / A4",
+    description="Secure API built with FastAPI + Supabase Auth",
+)
 
 security = HTTPBearer()
 
@@ -28,6 +32,7 @@ class RefreshRequest(BaseModel):
     refresh_token: str
 
 
+# Reusable Auth Middleware / Dependency
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ):
@@ -37,21 +42,29 @@ def get_current_user(
         if not user_response or not user_response.user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid or expired token",
+                detail={"error": "Invalid or expired token"},
             )
         return user_response.user
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
+            detail={"error": "Invalid or expired token"},
         )
 
 
+# Stage 0: Health Check
 @app.get("/")
-def health_check():
+def root():
     return {"message": "Server running and connected to Supabase"}
 
 
+# Stage 2: Public Endpoint
+@app.get("/public/info", status_code=status.HTTP_200_OK)
+def public_info():
+    return {"message": "Welcome stranger! This info is public."}
+
+
+# Stage 1: Signup Endpoint
 @app.post("/auth/signup", status_code=status.HTTP_201_CREATED)
 def signup(credentials: AuthRequest):
     try:
@@ -59,7 +72,7 @@ def signup(credentials: AuthRequest):
             {"email": credentials.email, "password": credentials.password}
         )
         if not response.user:
-            raise HTTPException(status_code=400, detail="Signup failed")
+            raise HTTPException(status_code=400, detail={"error": "Signup failed"})
         return {
             "message": "User created successfully",
             "user": {
@@ -69,9 +82,10 @@ def signup(credentials: AuthRequest):
             },
         }
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail={"error": str(e)})
 
 
+# Stage 1: Login Endpoint
 @app.post("/auth/login", status_code=status.HTTP_200_OK)
 def login(credentials: AuthRequest):
     try:
@@ -80,7 +94,7 @@ def login(credentials: AuthRequest):
         )
         if not response.session:
             raise HTTPException(
-                status_code=401, detail="Invalid login credentials"
+                status_code=401, detail={"error": "Invalid login credentials"}
             )
         return {
             "access_token": response.session.access_token,
@@ -89,12 +103,13 @@ def login(credentials: AuthRequest):
         }
     except Exception:
         raise HTTPException(
-            status_code=401, detail="Invalid login credentials"
+            status_code=401, detail={"error": "Invalid login credentials"}
         )
 
 
-@app.get("/auth/me", status_code=status.HTTP_200_OK)
-def get_me(current_user=Depends(get_current_user)):
+# Stage 2 & 3: Protected Profile Endpoint
+@app.get("/protected/profile", status_code=status.HTTP_200_OK)
+def get_profile(current_user=Depends(get_current_user)):
     return {
         "user": {
             "id": current_user.id,
@@ -104,14 +119,23 @@ def get_me(current_user=Depends(get_current_user)):
     }
 
 
-# Stage 3: Refresh Token Route
+# Stage 4: Second Protected Route (Dashboard)
+@app.get("/protected/dashboard", status_code=status.HTTP_200_OK)
+def get_dashboard(current_user=Depends(get_current_user)):
+    return {
+        "message": f"Welcome to your private dashboard, {current_user.email}!",
+        "user_id": current_user.id,
+    }
+
+
+# Stage 4: Refresh Token Route
 @app.post("/auth/refresh", status_code=status.HTTP_200_OK)
 def refresh_token(body: RefreshRequest):
     try:
         response = supabase.auth.refresh_session(body.refresh_token)
         if not response.session:
             raise HTTPException(
-                status_code=401, detail="Invalid or expired refresh token"
+                status_code=401, detail={"error": "Invalid or expired refresh token"}
             )
         return {
             "access_token": response.session.access_token,
@@ -120,15 +144,15 @@ def refresh_token(body: RefreshRequest):
         }
     except Exception:
         raise HTTPException(
-            status_code=401, detail="Invalid or expired refresh token"
+            status_code=401, detail={"error": "Invalid or expired refresh token"}
         )
 
 
-# Stage 3: Logout Route
-@app.post("/auth/logout", status_code=status.HTTP_200_OK)
+# Stage 4: Logout Route (204 No Content)
+@app.post("/auth/logout", status_code=status.HTTP_204_NO_CONTENT)
 def logout(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
         supabase.auth.sign_out()
-        return {"message": "Logged out successfully"}
+        return
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=400, detail={"error": str(e)})

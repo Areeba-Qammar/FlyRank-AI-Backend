@@ -42,4 +42,33 @@ Invoke-RestMethod -Uri http://localhost:8000/auth/signup -Method Post -ContentTy
 Expect a `201 Created` response containing the new user object.
 
 ---
-*Sections to add later: full API reference table (endpoint / method / auth required), Swagger UI screenshot, "AI vs me" writeup (Stage 7 bonus).*
+# FlyRank Auth API — Week 4 / A4
+
+Secure API built with FastAPI + Supabase Auth. Handles user registration, login, logout, token refresh, and protected route authorization via JWT.
+
+## API Reference
+
+| Endpoint | Method | Auth Required | Description |
+| :--- | :--- | :--- | :--- |
+| `/` | GET | No | Server health check |
+| `/public/info` | GET | No | Unprotected public information |
+| `/auth/signup` | POST | No | Registers a new user account |
+| `/auth/login` | POST | No | Authenticates user and returns JWT |
+| `/protected/profile` | GET | Yes (Bearer) | Returns authenticated user details |
+| `/protected/dashboard` | GET | Yes (Bearer) | Protected dashboard route |
+| `/auth/refresh` | POST | No | Generates new access token |
+| `/auth/logout` | POST | Yes (Bearer) | Invalidates user session |
+
+## Swagger UI Authorization Verification
+
+![Swagger UI Authorization](./swagger.png)
+
+## Local Setup
+
+1. Clone repository and navigate to `week-04-auth`.
+2. Install dependencies: `pip install -r requirements.txt`
+3. Create `.env` file using `.env.example` as reference:
+   ```env
+   SUPABASE_URL=your_supabase_project_url
+   SUPABASE_KEY=your_supabase_anon_key
+   PORT=8000
