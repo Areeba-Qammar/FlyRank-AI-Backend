@@ -1,14 +1,14 @@
-# FlyRank Auth API — Week 4 / A4
+# FlyRank Auth API-Week 4 / A4
 
-Secure REST API built with **FastAPI** + **Supabase Auth**. Handles the full authentication lifecycle — sign up, log in, token refresh, log out — and protects specific routes using a reusable JWT verification middleware.
+Secure REST API built with **FastAPI** + **Supabase Auth**. Handles the full authentication lifecycle — sign up, log in, token refresh, log out and protects specific routes using a reusable JWT verification middleware.
 
 ---
 
 ## Features
 
-- **Validation Guards** — a global exception handler converts missing/malformed input into a clean `400 Bad Request`.
-- **JWT Middleware Guard** — a reusable `get_current_user` dependency verifies the Bearer token against Supabase and returns `401 Unauthorized` for missing, malformed, or invalid/expired tokens.
-- **Session Management** — supports access/refresh token issuance and session sign-out via Supabase Auth.
+- **Validation Guards** : a global exception handler converts missing/malformed input into a clean `400 Bad Request`.
+- **JWT Middleware Guard** : a reusable `get_current_user` dependency verifies the Bearer token against Supabase and returns `401 Unauthorized` for missing, malformed, or invalid/expired tokens.
+- **Session Management** : supports access/refresh token issuance and session sign-out via Supabase Auth.
 
 ---
 
