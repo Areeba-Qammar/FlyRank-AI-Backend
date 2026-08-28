@@ -1,74 +1,61 @@
 # FlyRank Auth API — Week 4 / A4
 
-Secure API built with **FastAPI** + **Supabase Auth**. Handles sign up, log in, log out, and protects routes with JWT verification. (This README grows as each stage is completed — full API reference + Swagger screenshot get added in the final stage.)
-
-## Environment Setup
-
-### 1. Create a Supabase Project
-Go to [supabase.com](https://supabase.com), sign up free, and spin up a new project.
-
-### 2. Find Your Project URL and Anon Key
-In the Supabase Dashboard: **Project Settings** (⚙️ icon) → **API**.
-
-- **Project URL** — at the top of the page, looks like `https://xxxxxxxx.supabase.co`. This is **not** an API key.
-- **anon / publishable key** — a long string (older projects start with `eyJ...`, newer ones with `sb_publishable_...`). Safe to use client-side.
-- ⚠️ Never use the `service_role` / `sb_secret_...` key here — it bypasses all security checks and must stay server-side only.
-
-### 3. Create Your `.env` File
-
-```
-SUPABASE_URL=https://xxxxxxxx.supabase.co
-SUPABASE_KEY=your_anon_key_here
-PORT=8000
-```
-
-> `.env` is already in `.gitignore` — never commit real keys. A `.env.example` with placeholder values goes in the repo instead.
-
-## Running the Server
-
-```powershell
-venv\Scripts\activate
-uvicorn main:app --reload --port 8000
-```
-
-Expected output: `Server running and connected to Supabase`
-
-## Testing — Sign Up (PowerShell)
-
-```powershell
-Invoke-RestMethod -Uri http://localhost:8000/auth/signup -Method Post -ContentType "application/json" -Body '{"email":"testuser@example.com", "password":"password123"}'
-```
-
-Expect a `201 Created` response containing the new user object.
+Secure REST API built with **FastAPI** + **Supabase Auth**. Handles the full authentication lifecycle — sign up, log in, token refresh, log out — and protects specific routes using a reusable JWT verification middleware.
 
 ---
-# FlyRank Auth API — Week 4 / A4
 
-Secure API built with FastAPI + Supabase Auth. Handles user registration, login, logout, token refresh, and protected route authorization via JWT.
+## Features
+
+- **Validation Guards** — a global exception handler converts missing/malformed input into a clean `400 Bad Request`.
+- **JWT Middleware Guard** — a reusable `get_current_user` dependency verifies the Bearer token against Supabase and returns `401 Unauthorized` for missing, malformed, or invalid/expired tokens.
+- **Session Management** — supports access/refresh token issuance and session sign-out via Supabase Auth.
+
+---
 
 ## API Reference
 
-| Endpoint | Method | Auth Required | Description |
-| :--- | :--- | :--- | :--- |
-| `/` | GET | No | Server health check |
-| `/public/info` | GET | No | Unprotected public information |
-| `/auth/signup` | POST | No | Registers a new user account |
-| `/auth/login` | POST | No | Authenticates user and returns JWT |
-| `/protected/profile` | GET | Yes (Bearer) | Returns authenticated user details |
-| `/protected/dashboard` | GET | Yes (Bearer) | Protected dashboard route |
-| `/auth/refresh` | POST | No | Generates new access token |
-| `/auth/logout` | POST | Yes (Bearer) | Invalidates user session |
+| Endpoint | Method | Auth Required | Success | Errors | Description |
+|---|---|---|---|---|---|
+| `/` | GET | No | 200 | – | Health check |
+| `/public/info` | GET | No | 200 | – | Public, unprotected info |
+| `/auth/signup` | POST | No | 201 | 400 | Register a new user |
+| `/auth/login` | POST | No | 200 | 400, 401 | Authenticate & return access/refresh tokens |
+| `/auth/refresh` | POST | No | 200 | 401 | Exchange a refresh token for a new access token |
+| `/auth/logout` | POST | Yes (Bearer) | 204 | 401 | End the current session |
+| `/protected/profile` | GET | Yes (Bearer) | 200 | 401 | Verified user's own profile |
+| `/protected/dashboard` | GET | Yes (Bearer) | 200 | 401 | Second protected route (proves the middleware is reused, not copy-pasted) |
 
-## Swagger UI Authorization Verification
-
-![Swagger UI Authorization](./Swagger.png)
+---
 
 ## Local Setup
 
-1. Clone repository and navigate to `week-04-auth`.
-2. Install dependencies: `pip install -r requirements.txt`
-3. Create `.env` file using `.env.example` as reference:
-   ```env
-   SUPABASE_URL=your_supabase_project_url
-   SUPABASE_KEY=your_supabase_anon_key
+1. Clone the repo and move into the project folder:
+   ```bash
+   git clone https://github.com/Areeba-Qammar/FlyRank-AI-Backend.git
+   cd FlyRank-AI-Backend/week-04-auth
+   ```
+2. Create a virtual environment and install dependencies:
+   ```bash
+   python -m venv venv
+   venv\Scripts\activate       # Windows
+   pip install -r requirements.txt
+   ```
+3. Create a `.env` file (see `.env.example` for the key names):
+   ```
+   SUPABASE_URL=https://your-project.supabase.co
+   SUPABASE_KEY=your_anon_key_here
    PORT=8000
+   ```
+4. Run the server:
+   ```bash
+   uvicorn main:app --reload --port 8000
+   ```
+   Expected output: `Server running and connected to Supabase`
+
+---
+
+## Swagger UI
+
+Interactive docs are served at `http://localhost:8000/docs`. Click **Authorize**, paste a JWT obtained from `/auth/login`, and test any protected route directly from the browser.
+
+![Swagger UI showing the Authorize dialog and locked routes](./Swagger.png)
