@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, EmailStr
 from supabase import Client, create_client
 
@@ -15,10 +16,32 @@ if not SUPABASE_URL or not SUPABASE_KEY:
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 app = FastAPI(title="FlyRank Auth API - A4")
 
+security = HTTPBearer()
+
 
 class AuthRequest(BaseModel):
     email: EmailStr
     password: str
+
+
+# Helper dependency to verify JWT token
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+):
+    token = credentials.credentials
+    try:
+        user_response = supabase.auth.get_user(token)
+        if not user_response or not user_response.user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired token",
+            )
+        return user_response.user
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+        )
 
 
 @app.get("/")
@@ -65,4 +88,15 @@ def login(credentials: AuthRequest):
         raise HTTPException(
             status_code=401, detail="Invalid login credentials"
         )
-        
+
+
+# Stage 2: Protected Route
+@app.get("/auth/me", status_code=status.HTTP_200_OK)
+def get_me(current_user=Depends(get_current_user)):
+    return {
+        "user": {
+            "id": current_user.id,
+            "email": current_user.email,
+            "created_at": current_user.created_at,
+        }
+    }
