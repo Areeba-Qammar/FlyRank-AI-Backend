@@ -61,7 +61,7 @@ Secure API built with FastAPI + Supabase Auth. Handles user registration, login,
 
 ## Swagger UI Authorization Verification
 
-![Swagger UI Authorization](./swagger.png)
+![Swagger UI Authorization](./Swagger.png)
 
 ## Local Setup
 
