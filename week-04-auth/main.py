@@ -24,7 +24,10 @@ class AuthRequest(BaseModel):
     password: str
 
 
-# Helper dependency to verify JWT token
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
 ):
@@ -90,7 +93,6 @@ def login(credentials: AuthRequest):
         )
 
 
-# Stage 2: Protected Route
 @app.get("/auth/me", status_code=status.HTTP_200_OK)
 def get_me(current_user=Depends(get_current_user)):
     return {
@@ -100,3 +102,33 @@ def get_me(current_user=Depends(get_current_user)):
             "created_at": current_user.created_at,
         }
     }
+
+
+# Stage 3: Refresh Token Route
+@app.post("/auth/refresh", status_code=status.HTTP_200_OK)
+def refresh_token(body: RefreshRequest):
+    try:
+        response = supabase.auth.refresh_session(body.refresh_token)
+        if not response.session:
+            raise HTTPException(
+                status_code=401, detail="Invalid or expired refresh token"
+            )
+        return {
+            "access_token": response.session.access_token,
+            "refresh_token": response.session.refresh_token,
+            "token_type": "bearer",
+        }
+    except Exception:
+        raise HTTPException(
+            status_code=401, detail="Invalid or expired refresh token"
+        )
+
+
+# Stage 3: Logout Route
+@app.post("/auth/logout", status_code=status.HTTP_200_OK)
+def logout(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    try:
+        supabase.auth.sign_out()
+        return {"message": "Logged out successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
