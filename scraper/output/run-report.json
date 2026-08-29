@@ -1,8 +1,8 @@
 {
-  "start_time": "2026-08-28T21:34:26.529158+00:00",
-  "duration_seconds": 10.51,
-  "pages_fetched": 0,
-  "cache_hits": 63,
+  "start_time": "2026-08-29T11:26:57.091848+00:00",
+  "duration_seconds": 162.74,
+  "pages_fetched": 63,
+  "cache_hits": 0,
   "valid_records": 60,
   "invalid_records": 0,
   "failed_pages": 1

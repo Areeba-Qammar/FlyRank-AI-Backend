@@ -54,7 +54,8 @@ def fetch_url(url: str, cache_path: str) -> tuple[str, bool, int]:
     time.sleep(DELAY_SECONDS)
     headers = {"User-Agent": USER_AGENT}
     response = requests.get(url, headers=headers, timeout=TIMEOUT)
-    
+    response.encoding = "utf-8"  # books.toscrape.com doesn't declare a charset, so requests guesses wrong otherwise
+
     if response.status_code != 200:
         raise ValueError(f"HTTP status {response.status_code}")
         
