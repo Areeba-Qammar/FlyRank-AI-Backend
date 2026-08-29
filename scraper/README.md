@@ -47,11 +47,11 @@ Each book in `books.json`:
 }
 ```
 
-`failed_pages: 1` is expected — the script includes one made-up book URL on purpose, to prove a broken page doesn't take down the run.
+`failed_pages: 1` is expected, the script includes one made-up book URL on purpose, to prove a broken page doesn't take down the run.
 
 ## Why no browser was needed
 
-All the book data is already in the HTML the server sends back — nothing here is loaded in with JavaScript. A plain HTTP request gets everything a headless browser would, without the extra time and memory.
+All the book data is already in the HTML the server sends back, nothing here is loaded in with JavaScript. A plain HTTP request gets everything a headless browser would, without the extra time and memory.
 
 ## Ethics note
 
@@ -59,4 +59,4 @@ This only ran against Books to Scrape, a site built specifically for scraping pr
 
 ## Limitation
 
-The extraction depends on the page's current HTML (`div.product_main`, `#product_description`). If the site's layout changed, the selectors would need updating — there's no fallback right now, a missing field just becomes `null` or fails validation.
+The extraction depends on the page's current HTML (`div.product_main`, `#product_description`). If the site's layout changed, the selectors would need updating, there's no fallback right now, a missing field just becomes `null` or fails validation.
