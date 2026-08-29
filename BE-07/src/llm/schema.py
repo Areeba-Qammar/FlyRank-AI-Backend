@@ -1,19 +1,19 @@
-from pydantic import BaseModel, Field
 from enum import Enum
 from typing import List
+from pydantic import BaseModel, Field
 
 class Category(str, Enum):
-    tech = "tech"
-    business = "business"
-    health = "health"
-    lifestyle = "lifestyle"
-    other = "other"
+    TECH = "tech"
+    BUSINESS = "business"
+    HEALTH = "health"
+    LIFESTYLE = "lifestyle"
+    OTHER = "other"
 
 class QualityFlag(str, Enum):
-    duplicate = "duplicate"
-    low_content = "low_content"
-    spam = "spam"
-    ok = "ok"
+    DUPLICATE = "duplicate"
+    LOW_CONTENT = "low_content"
+    SPAM = "spam"
+    OK = "ok"
 
 class EnrichOutput(BaseModel):
     category: Category

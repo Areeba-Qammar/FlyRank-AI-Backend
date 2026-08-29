@@ -1,0 +1,10 @@
+[
+  {"text": "Apple unveiled its new M5 chip today, boasting a 40% performance increase.", "expected_category": "tech"},
+  {"text": "The Federal Reserve raised interest rates by 0.25% this quarter.", "expected_category": "business"},
+  {"text": "A new study links daily walking to reduced risk of heart disease.", "expected_category": "health"},
+  {"text": "Five simple morning habits that can improve your daily focus.", "expected_category": "lifestyle"},
+  {"text": "asdkj asd 123 !!! click here www.spam-link.biz", "expected_category": "other"},
+  {"text": "Q3", "expected_category": "other"},
+  {"text": "Scientists at MIT developed a battery that charges 10x faster using solid-state materials.", "expected_category": "tech"},
+  {"text": "Local bakery wins award for best sourdough three years running.", "expected_category": "lifestyle"}
+]
