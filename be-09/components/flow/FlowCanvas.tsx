@@ -35,12 +35,33 @@ function Canvas() {
 
   return (
     <div className="w-full h-screen bg-slate-950">
-      <div className="absolute z-10 top-4 left-4">
+            <div className="absolute z-10 top-4 left-4">
         <button
           onClick={addNode}
           className="bg-white text-black px-4 py-2 rounded-md text-sm font-medium shadow"
         >
           + Add Decision Node
+        </button>
+        <button
+          onClick={async () => {
+            if (nodes.length === 0) return;
+            await fetch("/api/run-flow", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                nodes: nodes.map((n) => ({ id: n.id, prompt: n.data.prompt })),
+                edges: edges.map((e) => ({
+                  source: e.source,
+                  sourceHandle: e.sourceHandle,
+                  target: e.target,
+                })),
+                startNodeId: nodes[0].id,
+              }),
+            });
+          }}
+          className="bg-green-500 text-black px-4 py-2 rounded-md text-sm font-medium shadow ml-2"
+        >
+          ▶ Run Flow
         </button>
       </div>
       <ReactFlow

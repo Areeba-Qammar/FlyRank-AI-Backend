@@ -36,11 +36,15 @@ export const useFlowStore = create<FlowState>((set, get) => ({
     set({ edges: applyEdgeChanges(changes, get().edges) });
   },
 
-  onConnect: (connection) => {
+   onConnect: (connection) => {
+    if (!connection.source || !connection.target) return;
     const isYes = connection.sourceHandle === "yes";
     const newEdge: Edge = {
-      ...connection,
       id: `e-${connection.source}-${connection.sourceHandle}-${connection.target}`,
+      source: connection.source,
+      target: connection.target,
+      sourceHandle: connection.sourceHandle,
+      targetHandle: connection.targetHandle,
       label: isYes ? "YES" : "NO",
       style: { stroke: isYes ? "#4ade80" : "#f87171", strokeWidth: 2 },
       animated: false,
