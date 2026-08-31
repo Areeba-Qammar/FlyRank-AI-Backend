@@ -10,6 +10,8 @@ import {
   EdgeChange,
 } from "reactflow";
 
+type ExecutionLog = { nodeId: string; prompt: string; answer: "YES" | "NO" };
+
 type FlowState = {
   nodes: Node[];
   edges: Edge[];
@@ -20,13 +22,20 @@ type FlowState = {
   updateNodePrompt: (id: string, prompt: string) => void;
   saveToLocalStorage: () => void;
   loadFromLocalStorage: () => void;
+  isRunning: boolean;
+  executionLogs: ExecutionLog[];
+  setRunning: (running: boolean) => void;
+  setExecutionLogs: (logs: ExecutionLog[]) => void;
 };
 
 let idCounter = 1;
 
 export const useFlowStore = create<FlowState>((set, get) => ({
   nodes: [],
-  edges: [],
+  edges: [],  isRunning: false,
+  executionLogs: [],
+  setRunning: (running) => set({ isRunning: running }),
+  setExecutionLogs: (logs) => set({ executionLogs: logs }),
 
   onNodesChange: (changes) => {
     set({ nodes: applyNodeChanges(changes, get().nodes) });

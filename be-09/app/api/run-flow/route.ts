@@ -8,10 +8,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "startNodeId is required" }, { status: 400 });
   }
 
-  await inngest.send({
+  const { ids } = await inngest.send({
     name: "flow/run",
     data: { nodes, edges, startNodeId },
   });
 
-  return NextResponse.json({ status: "triggered" });
+  return NextResponse.json({ status: "triggered", eventId: ids[0] });
 }

@@ -1,5 +1,6 @@
 import { inngest } from "./client";
 import { askYesNo } from "./llm";
+import { setResult } from "./results-store";
 
 type GraphNode = { id: string; prompt: string };
 type GraphEdge = { source: string; sourceHandle: "yes" | "no"; target: string };
@@ -39,6 +40,8 @@ export const runDecisionFlow = inngest.createFunction(
       currentId = nextEdge?.target;
       steps++;
     }
-    return { history, terminatedAt: currentId ?? null, totalSteps: steps };
+        const result = { history, terminatedAt: currentId ?? null, totalSteps: steps };
+    setResult(event.id, result);
+    return result;
   }
 );
