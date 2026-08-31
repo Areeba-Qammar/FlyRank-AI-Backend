@@ -33,8 +33,25 @@ init_reports_table()
 def health():
     return {"status": "ok"}
 
-@app.post("/reports", status_code=201)
-def create_report():
+from fastapi import Response
+from datetime import datetime
+
+@app.post("/reports")
+def create_report(response: Response, force: bool = False):
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    if not force:
+        conn = get_db()
+        existing = conn.execute(
+            "SELECT * FROM reports WHERE date(created_at) = ? ORDER BY created_at DESC LIMIT 1",
+            (today,),
+        ).fetchone()
+        conn.close()
+
+        if existing:
+            response.status_code = 200
+            return {"id": existing["id"], "file": f"/reports/{existing['id']}/file"}
+
     report_id = str(uuid.uuid4())
     os.makedirs("reports", exist_ok=True)
     file_path = f"reports/{report_id}.pdf"
@@ -51,8 +68,8 @@ def create_report():
     conn.commit()
     conn.close()
 
+    response.status_code = 201
     return {"id": report_id, "file": f"/reports/{report_id}/file"}
-
 @app.get("/reports/{report_id}")
 def get_report(report_id: str):
     conn = get_db()
