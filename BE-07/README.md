@@ -1,4 +1,4 @@
-# BE-07 - Put an LLM behind your API
+# BE-07: Put an LLM behind the API
 
 ## What this does
 
