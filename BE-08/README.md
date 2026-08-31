@@ -84,8 +84,7 @@ money: an e-commerce system that emails an order confirmation — without dedupl
 network retry could send the same customer the same email (or worse, the same charge) twice.
 
 ## Screenshot
-
-<TODO: paste your page-1 screenshot here, or reference the file, e.g. `![report page 1](screenshot.png)`>
+ ![Report page 1](screenshot.png)
 
 ## Eval / testing notes
 
