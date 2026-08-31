@@ -3,3 +3,4 @@ report.db
 reports/
 __pycache__/
 *.pyc
+my-report.pdf
