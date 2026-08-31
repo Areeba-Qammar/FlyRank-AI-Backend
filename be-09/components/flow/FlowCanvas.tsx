@@ -40,6 +40,36 @@ function Canvas() {
     setRunning,
     setExecutionLogs,
   } = useFlowStore();
+    const exportFlow = () => {
+    const data = JSON.stringify({ nodes, edges }, null, 2);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "flow.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importFlow = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result as string);
+        const restoredNodes = parsed.nodes.map((n: any) => ({
+          ...n,
+          data: { ...n.data, onPromptChange: useFlowStore.getState().updateNodePrompt },
+        }));
+        useFlowStore.setState({ nodes: restoredNodes, edges: parsed.edges });
+      } catch {
+        alert("Invalid flow file.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
 
   useEffect(() => {
     loadFromLocalStorage();
@@ -89,7 +119,7 @@ function Canvas() {
   return (
     <div className="w-full h-screen bg-slate-950 flex">
       <div className="relative flex-1">
-        <div className="absolute z-10 top-4 left-4 flex gap-2">
+                <div className="absolute z-10 top-4 left-4 flex gap-2">
           <button
             onClick={addNode}
             className="bg-white text-black px-4 py-2 rounded-md text-sm font-medium shadow"
@@ -103,6 +133,16 @@ function Canvas() {
           >
             {isRunning ? "Running..." : "▶ Run Flow"}
           </button>
+          <button
+            onClick={exportFlow}
+            className="bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium shadow"
+          >
+            ⬇ Export
+          </button>
+          <label className="bg-slate-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow cursor-pointer">
+            ⬆ Import
+            <input type="file" accept=".json" onChange={importFlow} className="hidden" />
+          </label>
         </div>
         <ReactFlow
           nodes={styledNodes}
