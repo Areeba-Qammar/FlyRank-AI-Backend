@@ -1,33 +1,33 @@
 # Your First Background Job
 
 A small FastAPI + Inngest API that demonstrates background jobs, status
-polling, retries, and a cron job — built for FlyRank's backend internship,
+polling, retries, and a cron job; built for FlyRank's backend internship,
 Week 4/A7.
 
 ## What this is
 
-- `GET /health` — liveness check
-- `POST /reports` — accepts a report request, returns instantly (`202`),
+- `GET /health`:liveness check
+- `POST /reports`: accepts a report request, returns instantly (`202`),
   the actual 8-second "work" happens in a background job, not the request
-- `GET /reports/{id}` — poll for status: `pending` → `done` (or `failed`)
+- `GET /reports/{id}`: poll for status: `pending` → `done` (or `failed`)
 - Three Inngest functions:
-  - `say-hello` — wiring test (event-triggered, sleeps 5s)
-  - `make-report` — the real background job (sleep 8s → build result,
+  - `say-hello`: wiring test (event-triggered, sleeps 5s)
+  - `make-report`: the real background job (sleep 8s → build result,
     `retries=2`, deliberately fails if topic is `"fail"`)
-  - `heartbeat` — cron job, runs every minute, logs pending/done/failed counts
+  - `heartbeat` : cron job, runs every minute, logs pending/done/failed counts
 
 ## How to run
 
 Two terminals, both from this folder.
 
-**Terminal 1 — the API:**
+**Terminal 1: the API:**
 
 ```
 $env:INNGEST_DEV = "1"
 uvicorn main:app --reload --port 8000
 ```
 
-**Terminal 2 — the Inngest Dev Server:**
+**Terminal 2: the Inngest Dev Server:**
 
 ```
 inngest-cli dev -u http://localhost:8000/api/inngest
